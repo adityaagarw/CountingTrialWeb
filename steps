@@ -1,0 +1,73 @@
+#Directory structure:
+---------------------
+electron-web-app/
+│
+├── backend/
+│   ├── controllers/
+│   ├── models/
+│   ├── routes/
+│   ├── config/
+│   ├── app.js
+│   └── package.json
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── App.js
+│   │   ├── index.js
+│   │   └── package.json
+│   └── package.json
+│
+├── main.js (Electron main process)
+│
+├── package.json (Main project configuration)
+│
+└── .gitignore
+
+# Initialize project
+-> npm init -y
+
+# Create backend
+-> mkdir backend
+-> cd backend
+-> mkdir controllers models routes config
+-> tpye nul > app.js
+
+# Initialize backend project
+-> npm init -y
+
+# Create frontend
+-> cd ..  # Navigate back to the root directory
+-> mkdir frontend
+-> cd frontend
+-> mkdir public src
+-> cd src
+-> mkdir components pages services
+-> type nul > App.js 
+-> type nul > index.js
+-> cd ../..
+
+# Initialize frontend project
+-> npm init -y
+
+# For electron main process
+-> type nul > main.js
+
+# Configure gitignore
+-> echo node_modules/ > .gitignore
+
+# Install dependencies
+-> cd backend
+-> npm install express sequelize pg bcryptjs jsonwebtoken
+-> cd ../frontend
+-> npm install bootstrap@latest
+-> npm install axios react-router-dom react-scripts
+-> npm install -g react-scripts
+
+-> npm run build <= In the frontend directory
+-> Electron . <= In the root directory
+-> npm install -g electron
+->  Set-ExecutionPolicy Unrestricted -Scope Process <= In the terminal
