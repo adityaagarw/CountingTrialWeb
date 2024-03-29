@@ -1,58 +1,44 @@
-// frontend/src/components/Dashboard.js
-
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
+import '../assets/bootstrap/css/bootstrap.min.css';
+import '../assets/fonts/fontawesome-all.min.css';
+import '../assets/bootstrap/js/bootstrap.min.js';
+import '../assets/js/chart.min.js';
+import '../assets/js/theme.js';
+import '../assets/js/bs-init.js';
+import Sidebar from './Sidebar';
+import Navbar from './Navbar';
+import Footer from './Footer';
 
 const Dashboard = () => {
-  const location = useLocation();
+  const navigate = useNavigate();
 
-  // Simulate user role (replace with actual logic)
-  const isAdmin = false; // Change to true if the user is an admin
+  const handleNavigation = (path) => {
+    navigate(path);
+  };
 
   return (
-    <div className="container-fluid">
-      <div className="row">
-        {/* Sidebar */}
-        <nav className="col-md-2 d-none d-md-block bg-light sidebar">
-          <div className="sidebar-sticky">
-            <ul className="nav flex-column">
-              <li className="nav-item">
-                <Link to="/dashboard" className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}>
-                  Dashboard Home
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link to="/dashboard/feeds" className={`nav-link ${location.pathname === '/dashboard/feeds' ? 'active' : ''}`}>
-                  Feeds
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link to="/dashboard/analytics" className={`nav-link ${location.pathname === '/dashboard/analytics' ? 'active' : ''}`}>
-                  Analytics
-                </Link>
-              </li>
-              {isAdmin && (
-                <li className="nav-item">
-                  <Link to="/dashboard/admin-panel" className={`nav-link ${location.pathname === '/dashboard/admin-panel' ? 'active' : ''}`}>
-                    Admin Panel
-                  </Link>
-                </li>
-              )}
-            </ul>
+    <>
+      <meta charSet="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+      <title>Avian</title>
+      <link rel="stylesheet" type="text/html" href="../assets/bootstrap/css/bootstrap.min.css" />
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&display=swap"
+      />
+      <link rel="stylesheet" type="text/html" href="../assets/fonts/fontawesome-all.min.css" />
+      <div id="wrapper">
+        <Sidebar onNavigation={handleNavigation} />
+        <div className="d-flex flex-column" id="content-wrapper">
+          <div id="content">
+            <Navbar />
+            <Outlet />
           </div>
-        </nav>
-
-        {/* Main content */}
-        <main role="main" className="col-md-9 ml-sm-auto col-lg-10 px-4">
-          <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 className="h2">Dashboard</h1>
-          </div>
-          
-          {/* Add your dashboard content here */}
-
-        </main>
+          <Footer />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
