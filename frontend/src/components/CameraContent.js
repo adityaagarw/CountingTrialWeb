@@ -15,7 +15,7 @@ const CameraContent = () => {
 
   const fetchCameraData = async () => {
     try {
-      const response = await axios.get(`${apiBaseUrl}/getCameras`);
+      const response = await axios.get(`${apiBaseUrl}/camera/get-cameras`);
       console.log('Camera data:', response.data);
       setCameras(response.data);
     } catch (error) {
@@ -38,7 +38,7 @@ const CameraContent = () => {
 
   const handleCameraDelete = async (camera_id) => {
     try {
-      await axios.delete(`${apiBaseUrl}/deleteCamera/${camera_id}`);
+      await axios.delete(`${apiBaseUrl}/camera/delete-camera/${camera_id}`);
       // Refresh the camera data after a camera is deleted
       fetchCameraData();
     } catch (error) {

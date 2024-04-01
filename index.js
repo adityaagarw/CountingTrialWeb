@@ -29,7 +29,7 @@ function createWindow() {
 
 app.whenReady().then(() => {
   createWindow();
-  tray = new Tray(path.join(__dirname, 'logo.png')); // Replace 'path-to-your-icon/icon.png' with the actual path to your icon
+  tray = new Tray(path.join(__dirname, 'logo_new.png')); // Replace 'path-to-your-icon/icon.png' with the actual path to your icon
   const contextMenu = Menu.buildFromTemplate([
     { label: 'Show App', click: () => mainWindow.show() },
     { label: 'Quit', click: () => { app.quitting = true; app.quit(); } }

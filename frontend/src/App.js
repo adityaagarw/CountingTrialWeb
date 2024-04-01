@@ -6,6 +6,7 @@ import SignupForm from './components/SignupForm';
 import CameraContent from './components/CameraContent';
 import FeedContent from './components/FeedContent';
 import DashboardContent from './components/DashboardContent';
+import RegionSelectorPage from './components/RegionSelectorPage';
 // Create a context to manage authentication status
 export const AuthContext = React.createContext();
 
@@ -40,6 +41,7 @@ function App() {
             <Route path="" element={<DashboardContent />} />
           </Route>
           {/* Add more routes here */}
+          <Route path="/region-selector/:feedId" element={<RegionSelectorPage />} />
         </Routes>
       </AuthContext.Provider>
     </HashRouter>

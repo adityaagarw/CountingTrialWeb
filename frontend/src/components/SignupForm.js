@@ -31,7 +31,7 @@ const SignupForm = () => {
             const username = email;
             // Check if isAdmin checkbox is ticked
             const isAdmin = document.getElementById('isAdmin').checked;
-            const response = await axios.post(`${apiBaseUrl}/signup`, { username, password, isAdmin: isAdmin});
+            const response = await axios.post(`${apiBaseUrl}/auth/signup`, { username, password, isAdmin: isAdmin});
             console.log(response)
             setErrorMessage('');
             setSuccessMessage('Account created successfully. Redirecting to Login.');

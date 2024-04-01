@@ -58,7 +58,7 @@ const AddCameraForm = ({ isOpen, onClose, onCameraAdded }) => {
 
   const handleAddCamera = async () => {
     try {
-      await axios.post(`${apiBaseUrl}/addCamera`, {
+      await axios.post(`${apiBaseUrl}/camera/add-camera`, {
         cameraUrlId,
         cameraType,
         resolution,

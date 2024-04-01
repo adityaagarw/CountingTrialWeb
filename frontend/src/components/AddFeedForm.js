@@ -24,7 +24,7 @@ const AddFeedForm = ({ isOpen, onClose, onFeedAdded }) => {
   useEffect(() => {
     // Fetch camera options from the backend
     const fetchCameraOptions = async () => {
-      const response = await axios.get(`${apiBaseUrl}/getCameraIds`);
+      const response = await axios.get(`${apiBaseUrl}/camera/get-camera-ids`);
       setCameraOptions(response.data);
       console.log(response.data);
       console.log("CameraOptions:",cameraOptions);
@@ -70,7 +70,7 @@ const AddFeedForm = ({ isOpen, onClose, onFeedAdded }) => {
 
       const config = JSON.stringify({model_name, classes_to_count, save_frames, track_length, buffer_size, target_width, target_height, track_confidence});
 
-      await axios.post(`${apiBaseUrl}/addFeed`, {
+      await axios.post(`${apiBaseUrl}/feed/add-feed`, {
         cameraId,
         name,
         location,

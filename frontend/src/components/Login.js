@@ -19,7 +19,7 @@ const Login = () => {
     try {
       // Send login request to backend
       const username = email;
-      const response = await axios.post(`${apiBaseUrl}/login`, { username, password });
+      const response = await axios.post(`${apiBaseUrl}/auth/login`, { username, password });
       console.log(response);
       setAuthStatus(true);
       if (response.data.role === 'admin') {

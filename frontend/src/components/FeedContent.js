@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AddFeedForm from './AddFeedForm';
-
+import RegionSelectorPage from './RegionSelectorPage';
+import { useNavigate } from 'react-router-dom';
 const apiBaseUrl = 'http://127.0.0.1:8000';
 
 const FeedContent = () => {
+  const [selectedFeed, setSelectedFeed] = useState(null);
+  const [isRegionSelectorOpen, setIsRegionSelectorOpen] = useState(false);
   const [showAddFeedForm, setShowAddFeedForm] = useState(false);
   const [feeds, setFeeds] = useState([]);
   const [feedStartStopStatus, setFeedStartStopStatus] = useState({});
+  const navigate = useNavigate();
+
   useEffect(() => {
     // Fetch feed data when the component mounts
     fetchFeedData();
@@ -15,7 +20,7 @@ const FeedContent = () => {
 
   const fetchFeedData = async () => {
     try {
-      const response = await axios.get(`${apiBaseUrl}/getFeeds`);
+      const response = await axios.get(`${apiBaseUrl}/feed/get-feeds`);
       console.log('Feed data:', response.data);
       setFeeds(response.data);
 
@@ -45,7 +50,7 @@ const FeedContent = () => {
 
   const handleFeedDelete = async (feedId) => {
     try {
-      await axios.delete(`${apiBaseUrl}/deleteFeed/${feedId}`);
+      await axios.delete(`${apiBaseUrl}/feed/delete-feed/${feedId}`);
       // Refresh the feed data after a feed is deleted
       fetchFeedData();
     } catch (error) {
@@ -56,13 +61,13 @@ const FeedContent = () => {
   const handleFeedStartStop = async (feedId) => {
     try {
       if (feedStartStopStatus[feedId] === 'started') {
-        await axios.post(`${apiBaseUrl}/stopFeed/${feedId}`);
+        await axios.post(`${apiBaseUrl}/feed/stop-feed/${feedId}`);
         setFeedStartStopStatus((prevStatus) => ({
           ...prevStatus,
           [feedId]: 'stopped',
         }));
       } else {
-        await axios.post(`${apiBaseUrl}/startFeed/${feedId}`);
+        await axios.post(`${apiBaseUrl}/feed/start-feed/${feedId}`);
         setFeedStartStopStatus((prevStatus) => ({
           ...prevStatus,
           [feedId]: 'started',
@@ -71,6 +76,21 @@ const FeedContent = () => {
     } catch (error) {
       console.error('Error starting/stopping feed:', error);
     }
+  };
+
+  const handleAddRegion = (feed) => {
+    navigate(`/region-selector/${feed.id}`);
+    //setSelectedFeed(feed);
+    //setIsRegionSelectorOpen(true);
+  };
+  
+  const handleRegionSave = () => {
+    // Refresh feed data
+    setIsRegionSelectorOpen(false);
+  };
+  
+  const handleRegionSelectorClose = () => {
+    setIsRegionSelectorOpen(false);
   };
 
   return (
@@ -120,12 +140,12 @@ const FeedContent = () => {
                 <td>{feed.feature_list}</td>
                 <td>{feed.feed_type}</td>
                 <td>
-                  <button className="btn btn-primary btn-sm text-center" type="button">
+                  <button className="btn btn-primary btn-sm text-center" type="button" onClick={() => handleAddRegion(feed)}>
                     Add region
                   </button>
                 </td>
                 <td>
-                <button
+                  <button
                     className={`btn btn-${feedStartStopStatus[feed.id] === 'started' ? 'warning' : 'success'} btn-sm`}
                     onClick={() => handleFeedStartStop(feed.id)}
                   >
@@ -171,6 +191,13 @@ const FeedContent = () => {
           </div>
         </div>
       </div>
+      {isRegionSelectorOpen && (
+        <RegionSelectorPage
+          feedId={selectedFeed.id}
+          onSave={handleRegionSave}
+          onClose={handleRegionSelectorClose} 
+        />
+      )}
     </div>
   );
 };
