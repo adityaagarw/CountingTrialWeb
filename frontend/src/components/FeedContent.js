@@ -13,6 +13,8 @@ const FeedContent = () => {
   const [feedStartStopStatus, setFeedStartStopStatus] = useState({});
   const navigate = useNavigate();
 
+  const [videoSources, setVideoSources] = useState({});
+
   useEffect(() => {
     // Fetch feed data when the component mounts
     fetchFeedData();
@@ -66,11 +68,19 @@ const FeedContent = () => {
           ...prevStatus,
           [feedId]: 'stopped',
         }));
+        setVideoSources((prevSources) => ({
+          ...prevSources,
+          [feedId]: '', // Set the video source URL to an empty string when stopping
+        }));
       } else {
         await axios.post(`${apiBaseUrl}/feed/start-feed/${feedId}`);
         setFeedStartStopStatus((prevStatus) => ({
           ...prevStatus,
           [feedId]: 'started',
+        }));
+        setVideoSources((prevSources) => ({
+          ...prevSources,
+          [feedId]: `${apiBaseUrl}/feed/view-feed/${feedId}`, // Set the video source URL when starting
         }));
       }
     } catch (error) {
@@ -178,12 +188,14 @@ const FeedContent = () => {
 
       <div className="container">
         <div className="row">
-          <div className="col">
-            <video width="260" height="200" controls>
-              <source type="video/webm" />
+        {feeds.map((feed) => (
+          <div key={feed.id} className="col">
+            <video width="260" height="200" controls autoPlay>
+              <source src={videoSources[feed.id]} type="video/webm" />
               <track kind="subtitles" />
             </video>
           </div>
+        ))}
         </div>
         <div className="row">
           <div className="col">

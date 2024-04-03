@@ -7,6 +7,7 @@ import CameraContent from './components/CameraContent';
 import FeedContent from './components/FeedContent';
 import DashboardContent from './components/DashboardContent';
 import RegionSelectorPage from './components/RegionSelectorPage';
+import DashboardContentAnalytics from './components/DashboardContentAnalytics';
 // Create a context to manage authentication status
 export const AuthContext = React.createContext();
 
@@ -38,7 +39,7 @@ function App() {
           <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}>
             <Route path="cameras" element={<CameraContent />} />
             <Route path="feeds" element={<FeedContent />} />
-            <Route path="" element={<DashboardContent />} />
+            <Route path="" element={<DashboardContentAnalytics />} />
           </Route>
           {/* Add more routes here */}
           <Route path="/region-selector/:feedId" element={<RegionSelectorPage />} />
