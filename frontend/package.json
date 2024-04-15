@@ -13,9 +13,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "apexcharts": "^3.48.0",
     "axios": "^1.6.8",
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.2",
+    "react-apexcharts": "^1.4.1",
     "react-chartjs-2": "^5.2.0",
     "react-datepicker": "^6.6.0",
     "react-konva": "^18.2.10",

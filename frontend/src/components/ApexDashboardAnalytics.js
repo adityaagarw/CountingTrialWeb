@@ -13,13 +13,7 @@ const ApexDashboardAnalytics = () => {
 
   const handleFormSubmit = async (apiEndpoint, formData) => {
     try {
-        console.log('Request Body:', {
-            from_datetime: formData.fromDate,
-            to_datetime: formData.toDate,
-            feed_id: formData.feedId,
-            chart_type: formData.chartType,
-          });
-
+      console.log('Form data:', formData);
       const response = await fetch('http://127.0.0.1:8000' + apiEndpoint, {
         method: 'POST',
         headers: {
@@ -29,13 +23,21 @@ const ApexDashboardAnalytics = () => {
           from_datetime: formData.fromDate,
           to_datetime: formData.toDate,
           feed_id: formData.feedId,
-          chart_type: formData.chartType,
+          //section_id = formData.sections,
+          sections: formData.sections,
         }),
       });
       if (!response.ok) {
         throw new Error('Failed to fetch data');
       }
       const jsonData = await response.json();
+      //add chart_type to json data
+      jsonData.chart_type = formData.chartType;
+      jsonData.api_desc = formData.apiDesc;
+      jsonData.feed_id = formData.feedId;
+      
+
+      console.log(jsonData)
       setAllChartData(prevData => [...prevData, jsonData]);
       setShowPopup(false);
     } catch (error) {
@@ -46,16 +48,20 @@ const ApexDashboardAnalytics = () => {
   useEffect(() => {
     const newChartData = [];
   
-    allChartData.forEach((chartData, index) => {
+    allChartData.forEach((chartData) => {
       const chartType = chartData?.chart_type || 'line';
+      const apiDesc = chartData.api_desc
+      const feedId = chartData.feed_id
         
 
       // Separate entry and exit data
-      const entryData = chartData.filter(data => data.attribute === 'entry');
-      const exitData = chartData.filter(data => data.attribute === 'exit');
-  
+      // const entryData = chartData.filter(data => data.attribute === 'entry');
+      // const exitData = chartData.filter(data => data.attribute === 'exit');
+      
+      const sectionIds = [...new Set(chartData.map(item => item.section_id))];
       // Combine entry and exit data for chart labels
-      const labels = [...new Set([...entryData.map(item => item.date), ...exitData.map(item => item.date)])].sort();
+      //const labels = [...new Set([...entryData.map(item => item.date), ...exitData.map(item => item.date)])].sort();
+      const labels = [...new Set(chartData.map(item => item.date))].sort();
   
       const options = {
         chart: {
@@ -68,29 +74,86 @@ const ApexDashboardAnalytics = () => {
             }
             
           },
+          
         xaxis: {
           categories: labels,
+          type: 'datetime',
+          tickAmount: getTickAmount(labels),
+        tickFormatter: (value) => getTickFormatter(value, labels),
+        },
+        yaxis: {
+          title: {
+            text: 'Count'
+          }
+        },
+        title: {
+          text: 'Feed: ' + feedId + '\t' + apiDesc,
+          align: 'left'
         },
       };
+  
+    //   const series = [
+    //     {
+    //       name: 'Entry',
+    //       data: labels.map(label => entryData.find(item => item.date === label)?.count || 0),
+    //     },
+    //     {
+    //       name: 'Exit',
+    //       data: labels.map(label => exitData.find(item => item.date === label)?.count || 0),
+    //     },
+    //   ];
+  
+    //   newChartData.push({ options, series, chartType });
+    // });
+  
+          // Create separate series for each section
+          const series = sectionIds.map(sectionId => {  // Modified this line
+            // Separate entry and exit data for each section
+            const entryData = chartData.filter(data => data.attribute === 'entry' && data.section_id === sectionId);  // Modified this line
+            const exitData = chartData.filter(data => data.attribute === 'exit' && data.section_id === sectionId);  // Modified this line
+            
+            return [
+              {
+                name: `Entry - Section ${sectionId}`,
+                data: labels.map(label => entryData.find(item => item.date === label)?.count || 0),
+              },
+              {
+                name: `Exit - Section ${sectionId}`,
+                data: labels.map(label => exitData.find(item => item.date === label)?.count || 0),
+              },
+            ];
+          }).flat();  // Added this line
+      
+          newChartData.push({ options, series, chartType });
+        });
 
-      console.log('Options:', options);
-  
-      const series = [
-        {
-          name: 'Entry',
-          data: labels.map(label => entryData.find(item => item.date === label)?.count || 0),
-        },
-        {
-          name: 'Exit',
-          data: labels.map(label => exitData.find(item => item.date === label)?.count || 0),
-        },
-      ];
-  
-      newChartData.push({ options, series });
-    });
-  
     setChartData(newChartData);
+
   }, [allChartData]);
+
+  const getTickAmount = (labels) => {
+    const dayDiff = (new Date(labels[labels.length - 1]) - new Date(labels[0])) / (1000 * 60 * 60 * 24);
+  
+    if (dayDiff < 7) {
+      return 24; // Show hourly data
+    } else if (dayDiff < 31) {
+      return 7; // Show daily data
+    } else {
+      return 12; // Show monthly data
+    }
+  };
+  
+  const getTickFormatter = (value, labels) => {
+    const date = new Date(value);
+  
+    if ((new Date(labels[labels.length - 1]) - new Date(labels[0])) / (1000 * 60 * 60 * 24) < 7) {
+      return `${date.getHours()}:00`;
+    } else if ((new Date(labels[labels.length - 1]) - new Date(labels[0])) / (1000 * 60 * 60 * 24) < 31) {
+      return `${date.getDate()}/${date.getMonth() + 1}`;
+    } else {
+      return `${date.getMonth() + 1}/${date.getFullYear()}`;
+    }
+  };
 
   return (
     <div className="container-fluid">
@@ -118,7 +181,7 @@ const ApexDashboardAnalytics = () => {
             <div className="card">
               <div className="card-header">Chart {index + 1}</div>
               <div className="card-body">
-                <Chart options={data.options} series={data.series} type="line" height={350} />
+                <Chart options={data.options} series={data.series} type={data.chartType} height={350}/>
               </div>
             </div>
           </div>

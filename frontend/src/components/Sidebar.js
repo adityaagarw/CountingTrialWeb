@@ -31,6 +31,7 @@ const Sidebar = () => {
               <span>Feeds</span>
             </Link>
           </li>
+          
         </ul>
         <div className="text-center d-none d-md-inline" />
       </div>
