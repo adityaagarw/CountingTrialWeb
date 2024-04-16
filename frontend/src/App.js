@@ -4,12 +4,8 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import SignupForm from './components/SignupForm';
 import CameraContent from './components/CameraContent';
-import FeedContent from './components/FeedContent';
-import DashboardContent from './components/DashboardContent';
 import RegionSelectorPage from './components/RegionSelectorPage';
 import ApexDashboardAnalytics from './components/ApexDashboardAnalytics';
-import FeedContentLive from './components/FeedContentLive';
-import FeedContentLiveSections from './components/FeedContentLiveSections';
 import FeedContentLiveTest from './components/FeedContentLiveTest';
 
 // Create a context to manage authentication status
