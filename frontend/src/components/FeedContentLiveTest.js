@@ -90,14 +90,20 @@ const FeedContent = () => {
 
   const handleWebSocketMessage = (messageData) => {
     const { feed_id: feedId, section_id: sectionId, attribute, count } = messageData;
-    const key = `${feedId}-${sectionId}`;
-  
+
     if (attribute === 'entry' && feedId > 0) {
       console.log('Updating entry count for feed:', feedId, 'and section:', sectionId);
       setActiveFeedContainers((prevContainers) =>
         prevContainers.map((container) =>
-          container.key === key
-            ? { ...container, entryCount: (container.entryCount || 0) + count }
+          container.feedId === feedId
+            ? {
+                ...container,
+                sections: container.sections.map((section) =>
+                  section.sectionId === sectionId
+                    ? { ...section, entryCount: (section.entryCount || 0) + 1 }
+                    : section
+                ),
+              }
             : container
         )
       );
@@ -105,13 +111,20 @@ const FeedContent = () => {
       console.log('Updating exit count for feed:', feedId, 'and section:', sectionId);
       setActiveFeedContainers((prevContainers) =>
         prevContainers.map((container) =>
-          container.key === key
-            ? { ...container, exitCount: (container.exitCount || 0) + count }
+          container.feedId === feedId
+            ? {
+                ...container,
+                sections: container.sections.map((section) =>
+                  section.sectionId === sectionId
+                    ? { ...section, exitCount: (section.exitCount || 0) + 1 }
+                    : section
+                ),
+              }
             : container
         )
       );
     }
-  };
+  }; 
 
   const handleOpenAddFeedForm = () => {
     setShowAddFeedForm(true);
@@ -139,7 +152,7 @@ const FeedContent = () => {
   const handleFeedStartStop = async (feedId) => {
     // Fetch the sections for this feed
     const sections = await fetchFeedSections(feedId);
-  
+
     if (feedStartStopStatus[feedId] === 'started') {
       // Stop feed logic
       await axios.post(`${apiBaseUrl}/feed/stop-feed/${feedId}`);
@@ -147,8 +160,8 @@ const FeedContent = () => {
         ...prevStatus,
         [feedId]: 'stopped',
       }));
-  
-      // Remove the containers for this feed
+
+      // Remove the container for this feed
       setActiveFeedContainers((prevContainers) =>
         prevContainers.filter((container) => container.feedId !== feedId)
       );
@@ -159,19 +172,18 @@ const FeedContent = () => {
         ...prevStatus,
         [feedId]: 'started',
       }));
-  
-      // Create a container for each section
-      const newContainers = sections.map((sectionId) => ({
-        key: `${feedId}-${sectionId}`, // Unique key for each container
+
+      // Create a container for the feed with sections
+      const newContainer = {
         feedId,
-        sectionId,
-        entryCount: 0,
-        exitCount: 0,
-      }));
-      setActiveFeedContainers((prevContainers) => [
-        ...prevContainers,
-        ...newContainers,
-      ]);
+        videoSource: '', // Set the video source URL for the feed
+        sections: sections.map((sectionId) => ({
+          sectionId,
+          entryCount: 0,
+          exitCount: 0,
+        })),
+      };
+      setActiveFeedContainers((prevContainers) => [...prevContainers, newContainer]);
     }
   };
   
@@ -263,36 +275,33 @@ const FeedContent = () => {
       </div>
 
       {activeFeedContainers.length > 0 && (
-    <div className="container-fluid">
-      {activeFeedContainers.map((container) => (
-        <div className="row" key={container.key}> {/* Use the unique key */}
-          <div className="col">
-            <h5>Feed ID: {container.feedId}, Section ID: {container.sectionId}</h5> {/* Display sectionId */}
-            <video width="260" height="200" controls autoPlay>
-              <source src={container.videoSource} type="video/webm" />
-              <track kind="subtitles" />
-            </video>
-          </div>
-          <div className="col">
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Entry Count</h5>
-                <p className="card-text">{container.entryCount || 0}</p>
+        <div className="container-fluid">
+          {activeFeedContainers.map((container) => (
+            <div className="row" key={container.feedId}>
+              <div className="col">
+                <h5>Feed ID: {container.feedId}</h5>
+                <video width="260" height="200" controls autoPlay>
+                  <source src={container.videoSource} type="video/webm" />
+                  <track kind="subtitles" />
+                </video>
               </div>
+              {container.sections.map((section) => (
+                <React.Fragment key={section.sectionId}>
+                  <div className="col">
+                    <div className="card">
+                      <div className="card-body">
+                        <h5 className="card-title">Section ID: {section.sectionId}</h5>
+                        <p className="card-text">Entry Count: {section.entryCount || 0}</p>
+                        <p className="card-text">Exit Count: {section.exitCount || 0}</p>
+                      </div>
+                    </div>
+                  </div>
+                </React.Fragment>
+              ))}
             </div>
-          </div>
-          <div className="col">
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Exit Count</h5>
-                <p className="card-text">{container.exitCount || 0}</p>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
-      ))}
-    </div>
-  )}
+      )}
 
   {isRegionSelectorOpen && (
     <RegionSelectorPage
