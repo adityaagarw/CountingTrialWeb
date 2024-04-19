@@ -211,14 +211,18 @@ const AddFeedForm = ({ isOpen, onClose, onFeedAdded }) => {
                 <label htmlFor="feedType" className="form-label">
                   Feed Type:
                 </label>
-                <input
-                  type="text"
+                <select
                   className="form-control"
                   id="feedType"
                   value={feedType}
                   onChange={(e) => setFeedType(e.target.value)}
                   required
-                />
+                >
+                  <option value="">Select a feed type</option>
+                  <option value="RTSP">RTSP</option>
+                  <option value="HTTP">HTTP</option>
+                  <option value="Video">Video</option>
+                </select>
               </div>
             </div>
             <div className="row mb-3">

@@ -13,9 +13,19 @@ const FeedContent = () => {
   const [feeds, setFeeds] = useState([]);
   const [feedStartStopStatus, setFeedStartStopStatus] = useState({});
   const navigate = useNavigate();
-
   const [activeFeedContainers, setActiveFeedContainers] = useState([]);
   const webSocketRef = useRef(null);
+
+  const fetchFeedStatus = async (feedId) => {
+    try {
+      const response = await axios.get(`${apiBaseUrl}/feed/get-feed-status/${feedId}`);
+      console.log('Feed status:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching feed status:', error);
+      return 'stopped';
+    }
+  };
 
   const fetchFeedSections = async (feedId) => {
     try {
@@ -49,7 +59,7 @@ const FeedContent = () => {
     webSocket.onerror = (event) => {
       console.error('WebSocket error:', event);
     };
-
+    
     webSocket.onclose = (event) => {
       console.log('WebSocket disconnected:', event.code, event.reason);
       // Attempt to reconnect after a delay
@@ -66,28 +76,64 @@ const FeedContent = () => {
     };
   }, []); // Empty dependency array ensures this effect runs only once
 
-  useEffect(() => {
-    // Fetch feed data when the component mounts
-    fetchFeedData();
-  }, []);
+   useEffect(() => {
+     // Fetch feed data when the component mounts
+     fetchFeedData();
+     console.log("USEFFFECCCTTT CALLEDDD");
+   }, []);
 
   const fetchFeedData = async () => {
+    console.log("FETCHING DATA CALLED")
     try {
       const response = await axios.get(`${apiBaseUrl}/feed/get-feeds`);
       console.log('Feed data:', response.data);
-      setFeeds(response.data);
 
       // Initialize the feedStartStopStatus object
       const initialStatus = {};
-      response.data.forEach((feed) => {
-        initialStatus[feed.id] = 'stopped';
-      });
+      for (const feed of response.data) {
+        const status = await fetchFeedStatus(feed.id);
+        initialStatus[feed.id] = status;
+      }
       setFeedStartStopStatus(initialStatus);
+      // response.data.forEach((feed) => {
+      //   // Check if a container already exists for this feed
+      //   if (!activeFeedContainers.find((container) => container.feedId === feed.id)) {
+      //     createNewContainerForFeed(feed.id);
+      //   }
+      // });
+      const newFeedIds = response.data.filter(
+        (feed) => !activeFeedContainers.some((container) => container.feedId === feed.id)
+      ).map((feed) => feed.id);
+      await Promise.all(newFeedIds.map(createNewContainerForFeed));
+
+      setFeeds(response.data);
+      return response.data;
     } catch (error) {
       console.error('Error fetching feed data:', error);
     }
   };
-
+  const createNewContainerForFeed = async (feedId) => {
+    // Fetch the sections for this feed
+    const existingContainer = activeFeedContainers.find((container) => container.feedId === feedId);
+    if (existingContainer) {
+      console.log('Container already exists for feed:', feedId);
+      return;
+    }
+    const sections = await fetchFeedSections(feedId);
+  
+    // Create a container for the feed with sections
+    const newContainer = {
+      feedId,
+      videoSource: '', // Set the video source URL for the feed
+      sections: sections.map((sectionId) => ({
+        sectionId,
+        entryCount: 0,
+        exitCount: 0,
+      })),
+    };
+  
+    setActiveFeedContainers((prevContainers) => [...prevContainers, newContainer]);
+  };
   const handleWebSocketMessage = (messageData) => {
     const { feed_id: feedId, section_id: sectionId, attribute, count } = messageData;
 
@@ -134,9 +180,12 @@ const FeedContent = () => {
     setShowAddFeedForm(false);
   };
 
-  const handleFeedAdded = () => {
+  const handleFeedAdded = async () => {
     // Refresh the feed data after a new feed is added
-    fetchFeedData();
+    //const updatedFeeds = await fetchFeedData();
+    //const feed = updatedFeeds[updatedFeeds.length - 1];
+    //await createNewContainerForFeed(feed.id);
+    await fetchFeedData();
   };
 
   const handleFeedDelete = async (feedId) => {
@@ -152,14 +201,23 @@ const FeedContent = () => {
   const handleFeedStartStop = async (feedId) => {
     // Fetch the sections for this feed
     const sections = await fetchFeedSections(feedId);
+    const status = feedStartStopStatus[feedId];
+  
+    // If sections is blank alert the user that no sections exist and return
+    if (sections.length === 0) {
+      alert('No regions exist for this feed. Please add regions before starting the feed.');
+      return;
+    }
 
-    if (feedStartStopStatus[feedId] === 'started') {
+    if (status === 'started') {
       // Stop feed logic
-      await axios.post(`${apiBaseUrl}/feed/stop-feed/${feedId}`);
-      setFeedStartStopStatus((prevStatus) => ({
-        ...prevStatus,
-        [feedId]: 'stopped',
-      }));
+      const response = await axios.post(`${apiBaseUrl}/feed/stop-feed/${feedId}`);
+      if (response.data === 'success') {
+        setFeedStartStopStatus((prevStatus) => ({
+          ...prevStatus,
+          [feedId]: 'stopped',
+        }));  
+      }
 
       // Remove the container for this feed
       setActiveFeedContainers((prevContainers) =>
@@ -167,23 +225,13 @@ const FeedContent = () => {
       );
     } else {
       // Start feed logic
-      await axios.post(`${apiBaseUrl}/feed/start-feed/${feedId}`);
-      setFeedStartStopStatus((prevStatus) => ({
-        ...prevStatus,
-        [feedId]: 'started',
-      }));
-
-      // Create a container for the feed with sections
-      const newContainer = {
-        feedId,
-        videoSource: '', // Set the video source URL for the feed
-        sections: sections.map((sectionId) => ({
-          sectionId,
-          entryCount: 0,
-          exitCount: 0,
-        })),
-      };
-      setActiveFeedContainers((prevContainers) => [...prevContainers, newContainer]);
+      const response  = await axios.post(`${apiBaseUrl}/feed/start-feed/${feedId}`);
+      if (response.data === 'success') {
+        setFeedStartStopStatus((prevStatus) => ({
+         ...prevStatus,
+         [feedId]: 'started',
+        }));
+      }
     }
   };
   
