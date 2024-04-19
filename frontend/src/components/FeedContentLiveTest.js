@@ -327,7 +327,7 @@ const FeedContent = () => {
           {activeFeedContainers.map((container) => (
             <div className="row" key={container.feedId}>
               <div className="col">
-                <h5>Feed ID: {container.feedId}</h5>
+                <h5>Feed: {container.feedId}</h5>
                 <video width="260" height="200" controls autoPlay>
                   <source src={container.videoSource} type="video/webm" />
                   <track kind="subtitles" />
@@ -336,11 +336,11 @@ const FeedContent = () => {
               {container.sections.map((section) => (
                 <React.Fragment key={section.sectionId}>
                   <div className="col">
+                  <h8 className="card-title">Section : {section.sectionId}</h8>
                     <div className="card">
                       <div className="card-body">
-                        <h5 className="card-title">Section ID: {section.sectionId}</h5>
-                        <p className="card-text">Entry Count: {section.entryCount || 0}</p>
-                        <p className="card-text">Exit Count: {section.exitCount || 0}</p>
+                        <p className="card-text">Entry: {section.entryCount || 0}</p>
+                        <p className="card-text">Exit: {section.exitCount || 0}</p>
                       </div>
                     </div>
                   </div>
