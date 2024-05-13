@@ -15,10 +15,8 @@ const FeedContent = () => {
   const [feedStartStopStatus, setFeedStartStopStatus] = useState({});
   const navigate = useNavigate();
   const [activeFeedContainers, setActiveFeedContainers] = useState([]);
-  const webSocketRef = useRef(null);
-  const streamSocketRef = useRef(null);
-  const [streamSocket, setStreamSocket] = useState(null);
-  const [receivedImageData, setReceivedImageData] = useState(null);
+  const notificationWebSocketRef = useRef(null);
+  const streamWebSocketRef = useRef(null);
 
   const fetchFeedStatus = async (feedId) => {
     try {
@@ -35,92 +33,77 @@ const FeedContent = () => {
     try {
       const response = await axios.get(`${apiBaseUrl}/feed/get-sections/${feedId}`);
       console.log('Feed sections:', response.data);
-      return response.data;  // Return the sections
+      return response.data;
     } catch (error) {
       console.error('Error fetching feed sections:', error);
-      return [];  // Return an empty array in case of error
+      return [];
     }
   };
 
-  // Establish WebSocket connection only once when the component mounts
   useEffect(() => {
-    const webSocket = new WebSocket(`ws://127.0.0.1:8000/ws`);
-    webSocketRef.current = webSocket;
-
-    webSocket.onopen = () => {
-      console.log('WebSocket connected');
-    };
-
-    webSocket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-
-      if (data.message) {
-        const messageData = JSON.parse(data.message);
-        console.log('WebSocket message JSON:', messageData.uuid);
-        handleWebSocketMessage(messageData);
-      }
-    };
-
-    webSocket.onerror = (event) => {
-      console.error('WebSocket error:', event);
-    };
-    
-    webSocket.onclose = (event) => {
-      console.log('WebSocket disconnected:', event.code, event.reason);
-      // Attempt to reconnect after a delay
-      setTimeout(() => {
-        webSocketRef.current = null;
-      }, 5000);
-    };
-
-    // Clean up WebSocket on component unmount
-    return () => {
-      if (webSocketRef.current) {
-        webSocketRef.current.close();
-      }
-    };
-  }, []); // Empty dependency array ensures this effect runs only once
-
-
-  useEffect(() => {
-    // Fetch feed data when the component mounts
     fetchFeedData();
   }, []);
 
-  // Effect to establish the /stream WebSocket connection
   useEffect(() => {
-    const socket = new WebSocket('ws://127.0.0.1:8000/stream');
-    setStreamSocket(socket);
-    streamSocketRef.current = streamSocket;
+    const notificationSocket = new WebSocket(`ws://127.0.0.1:8000/ws`);
+    notificationWebSocketRef.current = notificationSocket;
 
-    socket.onopen = () => {
-      console.log('Streamsocket connected');
+    notificationSocket.onopen = () => {
+      console.log('Notification WebSocket connected');
     };
 
-    socket.onmessage = (event) => {
-      const data = event.data;
-      if (data.image) {
-        const imageData = data.image;
-        const binaryData = Uint8Array.from(atob(imageData), (c) => c.charCodeAt(0));
-        const blob = new Blob([binaryData], { type: 'image/jpeg' });
-        const imageUrl = URL.createObjectURL(blob);
-        setReceivedImageData(imageUrl);
+    notificationSocket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data)
+      if (data.type === 'notification') {
+        const messageData = JSON.parse(data.data);
+        console.log('Notification message JSON:', messageData.uuid);
+        handleWebSocketNotification(messageData);
       }
     };
 
-    // ... (Other event handlers for /stream socket)
-    socket.onclose = (event) => {
-      console.log('StreamSocket disconnected:', event.code, event.reason);
-      // Attempt to reconnect after a delay
+    notificationSocket.onerror = (event) => {
+      console.error('Notification WebSocket error:', event);
+    };
+
+    notificationSocket.onclose = (event) => {
+      console.log('Notification WebSocket disconnected:', event.code, event.reason);
       setTimeout(() => {
-        streamSocketRef.current = null;
+        notificationWebSocketRef.current = null;
+      }, 5000);
+    };
+
+    const streamSocket = new WebSocket('ws://127.0.0.1:8000/stream');
+    streamWebSocketRef.current = streamSocket;
+
+    streamSocket.onopen = () => {
+      console.log('Stream WebSocket connected');
+    };
+
+    streamSocket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      
+       if (data.type === 'stream') {
+        console.log(data)
+         const { data: image } = data;
+        handleWebSocketStreamData(1, data.image);
+      }
+    };
+
+    streamSocket.onerror = (event) => {
+      console.error('Stream WebSocket error:', event);
+    };
+
+    streamSocket.onclose = (event) => {
+      console.log('Stream WebSocket disconnected:', event.code, event.reason);
+      setTimeout(() => {
+        streamWebSocketRef.current = null;
       }, 5000);
     };
 
     return () => {
-      if (streamSocketRef.current) {
-        streamSocketRef.current.close();
-      }
+      notificationSocket.close();
+      streamSocket.close();
     };
   }, []);
 
@@ -129,7 +112,6 @@ const FeedContent = () => {
       const response = await axios.get(`${apiBaseUrl}/feed/get-feeds`);
       console.log('Feed data:', response.data);
 
-      // Initialize the feedStartStopStatus object
       const initialStatus = {};
       for (const feed of response.data) {
         const status = await fetchFeedStatus(feed.id);
@@ -137,13 +119,11 @@ const FeedContent = () => {
       }
       setFeedStartStopStatus(initialStatus);
 
-      // Check if a container already exists for each feed
       const existingFeedIds = activeFeedContainers.map(container => container.feedId);
       const newFeedIds = response.data.filter(
         feed => !existingFeedIds.includes(feed.id)
       ).map(feed => feed.id);
 
-      // Create a container for each new feed
       await Promise.all(newFeedIds.map(createNewContainerForFeed));
 
       setFeeds(response.data);
@@ -154,7 +134,6 @@ const FeedContent = () => {
   };
 
   const createNewContainerForFeed = async (feedId) => {
-    // Fetch the sections for this feed
     const existingContainer = activeFeedContainers.find(container => container.feedId === feedId);
     if (existingContainer) {
       console.log('Container already exists for feed:', feedId);
@@ -163,10 +142,9 @@ const FeedContent = () => {
 
     const sections = await fetchFeedSections(feedId);
 
-    // Create a container for the feed with sections
     const newContainer = {
       feedId,
-      videoSource: '', // Set the video source URL for the feed
+      videoSource: '',
       sections: sections.map(sectionId => ({
         sectionId,
         entryCount: 0,
@@ -177,7 +155,7 @@ const FeedContent = () => {
     setActiveFeedContainers(prevContainers => [...prevContainers, newContainer]);
   };
 
-  const handleWebSocketMessage = (messageData) => {
+  const handleWebSocketNotification = (messageData) => {
     const { feed_id: feedId, section_id: sectionId, attribute, count } = messageData;
 
     if (attribute === 'entry' && feedId > 0) {
@@ -189,7 +167,7 @@ const FeedContent = () => {
                 ...container,
                 sections: container.sections.map(section =>
                   section.sectionId === sectionId
-                  ? { ...section, entryCount: (section.entryCount || 0) + 1, highlighted: true, highlightType: 'entry' }
+                    ? { ...section, entryCount: (section.entryCount || 0) + 1, highlighted: true, highlightType: 'entry' }
                     : section
                 ),
               }
@@ -211,7 +189,7 @@ const FeedContent = () => {
               : container
           )
         );
-      }, 400); // Duration in milliseconds
+      }, 400);
     } else if (attribute === 'exit' && feedId > 0) {
       console.log('Updating exit count for feed:', feedId, 'and section:', sectionId);
       setActiveFeedContainers(prevContainers =>
@@ -221,31 +199,43 @@ const FeedContent = () => {
                 ...container,
                 sections: container.sections.map(section =>
                   section.sectionId === sectionId
-                  ? { ...section, exitCount: (section.exitCount || 0) + 1, highlighted: true, highlightType: 'exit' }
+                    ? { ...section, exitCount: (section.exitCount || 0) + 1, highlighted: true, highlightType: 'exit' }
                     : section
                 ),
               }
             : container
         )
       );
-      // Set timeout to reset highlighted flag after 3 seconds (adjust the duration as needed)
-    setTimeout(() => {
-      setActiveFeedContainers((prevContainers) =>
-        prevContainers.map((container) =>
-          container.feedId === feedId
-            ? {
-                ...container,
-                sections: container.sections.map((section) =>
+      setTimeout(() => {
+        setActiveFeedContainers((prevContainers) =>
+          prevContainers.map((container) =>
+            container.feedId === feedId
+              ? {
+                  ...container,
+                  sections: container.sections.map(section=>
                   section.sectionId === sectionId
-                    ? { ...section, highlighted: false }
-                    : section
-                ),
-              }
-            : container
-        )
-      );
-    }, 400); // Duration in milliseconds
+                      ? { ...section, highlighted: false }
+                      : section
+                  ),
+                }
+              : container
+          )
+        );
+      }, 400); // Duration in milliseconds
     }
+  };
+
+  const handleWebSocketStreamData = (feedId, imageData) => {
+    setActiveFeedContainers((prevContainers) => {
+      const updatedContainers = [...prevContainers];
+      const containerIndex = updatedContainers.findIndex((container) => container.feedId === feedId);
+      if (containerIndex !== -1) {
+        updatedContainers[containerIndex].imageData = imageData;
+      } else {
+        updatedContainers.push({ feedId, imageData });
+      }
+      return updatedContainers;
+    });
   };
 
   const handleOpenAddFeedForm = () => {
@@ -389,21 +379,17 @@ const FeedContent = () => {
       </div>
       {activeFeedContainers.length > 0 && (
         <div className="container-fluid">
-      {receivedImageData && (
-  <div>
-    <h4>Received Image</h4>
-    <img src={receivedImageData} alt="Received" />
-    {console.log('Rendering received image:', receivedImageData)}
-  </div>
-)}
           {activeFeedContainers.map((container) => (
             <div className="row" key={container.feedId}>
               <div className="col">
                 <h5>Feed: {container.feedId}</h5>
-                <video width="260" height="200" controls autoPlay>
+                {/* {container.imageData && ( */}
+                  <img src={`data:image/jpeg;base64,${container.imageData}`} alt={`Feed ${container.feedId}`} />
+                {/* )} */}
+                {/* <video width="260" height="200" controls autoPlay>
                   <source src={container.videoSource} type="video/webm" />
                   <track kind="subtitles" />
-                </video>
+                </video> */}
               </div>
               {container.sections.map((section) => (
                 <React.Fragment key={section.sectionId}>

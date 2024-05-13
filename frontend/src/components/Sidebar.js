@@ -31,7 +31,12 @@ const Sidebar = () => {
               <span>Feeds</span>
             </Link>
           </li>
-          
+          <li className="nav-item">
+            <Link className="nav-link" to="/dashboard/trends">
+              <i className="fas fa-table" />
+              <span>Trends</span>
+            </Link>
+          </li>
         </ul>
         <div className="text-center d-none d-md-inline" />
       </div>

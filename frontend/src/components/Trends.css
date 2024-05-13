@@ -1,0 +1,38 @@
+.icon-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .card-title {
+    margin-bottom: 10px;
+    text-align: center;
+    }
+    
+  .card-trend {
+    border-color: #ccc;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease-in-out;
+    align-items: center;
+  }
+  
+  .card-trend:hover {
+    box-shadow: 0 4px 8px rgba(16, 87, 211, 0.429);
+  }
+  
+  .trend-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+
+  .trend-container {
+    display: ruby-text;
+    align-items: center;
+  }
+  
+  .trend-icon-container {
+    margin-right: 5px; /* Adjust this value as needed for spacing */
+  }
+  

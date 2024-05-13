@@ -1,0 +1,37 @@
+.highlighted-entry {
+    animation: highlight-entry 1s;
+  }
+  
+  .highlighted-exit {
+    animation: highlight-exit 1s;
+  }
+  
+  @keyframes highlight-entry {
+    0% {
+      background-color: transparent;
+    }
+    50% {
+      background-color: lightgreen;
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
+  
+  @keyframes highlight-exit {
+    0% {
+      background-color: transparent;
+    }
+    50% {
+      background-color: lightcoral;
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
+
+  .updated {
+    transition: background-color 0.5s ease;
+    background-color: lightgreen;
+  }
+  

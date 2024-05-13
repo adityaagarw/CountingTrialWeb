@@ -1,0 +1,34 @@
+.green-shadow {
+  /*box-shadow: 0 4px 8px 0 rgba(0, 255, 0, 0.2), 0 6px 20px 0 rgba(0, 255, 0, 0.19);*/
+  animation: highlight-entry 1s;
+
+}
+
+.red-shadow {
+  /*box-shadow: 0 4px 8px 0 rgba(255, 0, 0, 0.2), 0 6px 20px 0 rgba(255, 0, 0, 0.19);*/
+  animation: highlight-exit 1s;
+}
+
+@keyframes highlight-entry {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: lightgreen;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes highlight-exit {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: lightcoral;
+  }
+  100% {
+    background-color: transparent;
+  }
+}

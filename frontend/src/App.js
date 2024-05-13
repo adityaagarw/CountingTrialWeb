@@ -6,7 +6,9 @@ import SignupForm from './components/SignupForm';
 import CameraContent from './components/CameraContent';
 import RegionSelectorPage from './components/RegionSelectorPage';
 import ApexDashboardAnalytics from './components/ApexDashboardAnalytics';
+import FeedContentLiveStream from './components/FeedContentLiveStream';
 import FeedContentLiveTest from './components/FeedContentLiveTest';
+import Trends from './components/Trends';
 
 // Create a context to manage authentication status
 export const AuthContext = React.createContext();
@@ -38,8 +40,9 @@ function App() {
           {/* Protected route to dashboard page */}
           <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}>
             <Route path="cameras" element={<CameraContent />} />
-            <Route path="feeds" element={<FeedContentLiveTest />} />
+            <Route path="feeds" element={<FeedContentLiveStream />} />
             <Route path="" element={<ApexDashboardAnalytics />} />
+            <Route path="trends" element={<Trends />} />
           </Route>
           {/* Add more routes here */}
           <Route path="/region-selector/:feedId" element={<RegionSelectorPage />} />
