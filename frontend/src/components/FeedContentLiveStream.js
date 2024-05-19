@@ -294,6 +294,7 @@ const FeedContent = () => {
   const handleAddRegion = (feed) => {
     setSelectedFeed(feed);
     setIsRegionSelectorOpen(true);
+    navigate(`/region-selector/${feed.id}`);
   };
 
   const handleRegionSave = () => {
