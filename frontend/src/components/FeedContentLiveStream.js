@@ -17,6 +17,10 @@ const FeedContent = () => {
   const [activeFeedContainers, setActiveFeedContainers] = useState([]);
   const notificationWebSocketRef = useRef(null);
   const streamWebSocketRef = useRef(null);
+  const [activeStreamSockets, setActiveStreamSockets] = useState([]);
+  const [streamSocketRef, setStreamSocketRef] = useState([]);
+
+
 
   const fetchFeedStatus = async (feedId) => {
     try {
@@ -42,6 +46,7 @@ const FeedContent = () => {
 
   useEffect(() => {
     fetchFeedData();
+    console.log(activeStreamSockets);
   }, []);
 
   useEffect(() => {
@@ -73,8 +78,16 @@ const FeedContent = () => {
       }, 5000);
     };
 
-    const streamSocket = new WebSocket('ws://127.0.0.1:8000/stream');
-    streamWebSocketRef.current = streamSocket;
+    return () => {
+      notificationSocket.close();
+      activeStreamSockets.map(activeSocket => {activeSocket.close()});
+    };
+  }, []);
+
+  const createStreamSocket = (feed_id) => {
+    const streamSocket = new WebSocket(`ws://127.0.0.1:8000/stream/${feed_id}`);
+
+    setActiveStreamSockets(prevStreamSockets => [...prevStreamSockets, streamSocket]);
 
     streamSocket.onopen = () => {
       console.log('Stream WebSocket connected');
@@ -83,10 +96,9 @@ const FeedContent = () => {
     streamSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       
-       if (data.type === 'stream') {
-        console.log(data)
-         const { data: image } = data;
-        handleWebSocketStreamData(1, data.image);
+      if (data.type === 'stream') {
+        console.log("FEED_ID: ", data.feed_id);
+        handleWebSocketStreamData(parseInt(data.feed_id), data.image);
       }
     };
 
@@ -100,12 +112,7 @@ const FeedContent = () => {
         streamWebSocketRef.current = null;
       }, 5000);
     };
-
-    return () => {
-      notificationSocket.close();
-      streamSocket.close();
-    };
-  }, []);
+  }
 
   const fetchFeedData = async () => {
     try {
@@ -127,6 +134,12 @@ const FeedContent = () => {
       await Promise.all(newFeedIds.map(createNewContainerForFeed));
 
       setFeeds(response.data);
+      
+      // Create stream websockets for all feeds
+      for (const feed of response.data) {
+        createStreamSocket(feed.id);
+      }
+
       return response.data;
     } catch (error) {
       console.error('Error fetching feed data:', error);
