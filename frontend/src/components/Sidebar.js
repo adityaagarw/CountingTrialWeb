@@ -33,7 +33,7 @@ const Sidebar = () => {
           </li>
           <li className="nav-item">
             <Link className="nav-link" to="/dashboard/trends">
-              <i className="fas fa-table" />
+              <i className="fas fa-chart-line" />
               <span>Trends</span>
             </Link>
           </li>

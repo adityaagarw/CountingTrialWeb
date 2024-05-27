@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import AddFeedForm from './AddFeedForm';
 import RegionSelectorPage from './RegionSelectorPage';
-import { useNavigate } from 'react-router-dom';
+import { json, useNavigate } from 'react-router-dom';
 import './styles.css';
 
 const apiBaseUrl = 'http://127.0.0.1:8000';
@@ -59,9 +59,8 @@ const FeedContent = () => {
 
     notificationSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log(data)
-      if (data.type === 'notification') {
-        const messageData = JSON.parse(data.data);
+      const messageData = JSON.parse(data.message);
+      if (messageData.type === 'notification') {
         console.log('Notification message JSON:', messageData.uuid);
         handleWebSocketNotification(messageData);
       }
@@ -97,7 +96,6 @@ const FeedContent = () => {
       const data = JSON.parse(event.data);
       
       if (data.type === 'stream') {
-        console.log("FEED_ID: ", data.feed_id);
         handleWebSocketStreamData(parseInt(data.feed_id), data.image);
       }
     };
@@ -170,7 +168,7 @@ const FeedContent = () => {
 
   const handleWebSocketNotification = (messageData) => {
     const { feed_id: feedId, section_id: sectionId, attribute, count } = messageData;
-
+    console.log(messageData)
     if (attribute === 'entry' && feedId > 0) {
       console.log('Updating entry count for feed:', feedId, 'and section:', sectionId);
       setActiveFeedContainers(prevContainers =>

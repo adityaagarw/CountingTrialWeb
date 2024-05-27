@@ -8,17 +8,17 @@ const apiBaseUrl = 'http://127.0.0.1:8000';
 
 const Trends = () => {
   const [footfallData, setFootfallData] = useState({
-    monthly: { current: 0, previous: 0 },
-    weekly: { current: 0, previous: 0 },
-    daily: { current: 0, previous: 0 },
-    hourly: { current: 0, previous: 0 },
+    monthly_footfall: { current: 0, previous: 0 },
+    weekly_footfall: { current: 0, previous: 0 },
+    daily_footfall: { current: 0, previous: 0 },
+    hourly_footfall: { current: 0, previous: 0 },
   });
 
   const [salesData, setSalesData] = useState({
-    monthly: { current: 0, previous: 0 },
-    weekly: { current: 0, previous: 0 },
-    daily: { current: 0, previous: 0 },
-    hourly: { current: 0, previous: 0 },
+    monthly_sales: { current: 0, previous: 0 },
+    weekly_sales: { current: 0, previous: 0 },
+    daily_sales: { current: 0, previous: 0 },
+    hourly_sales: { current: 0, previous: 0 },
   });
 
   const [showPercentage, setShowPercentage] = useState(true);
@@ -28,19 +28,21 @@ const Trends = () => {
       try {
         const response = await axios.get(`${apiBaseUrl}/analytics/trend-data`);
         const data = response.data;
-  
+        
+        console.log(data)
+
         setFootfallData({
-          monthly: data.monthly,
-          weekly: data.weekly,
-          daily: data.daily,
-          hourly: data.hourly,
+          monthly_footfall: data.monthly_footfall,
+          weekly_footfall: data.weekly_footfall,
+          daily_footfall: data.daily_footfall,
+          hourly_footfall: data.hourly_footfall,
         });
   
         setSalesData({
-          monthly: data.monthly,
-          weekly: data.weekly,
-          daily: data.daily,
-          hourly: data.hourly,
+          monthly_sales: data.monthly_sales,
+          weekly_sales: data.weekly_sales,
+          daily_sales: data.daily_sales,
+          hourly_sales: data.hourly_sales,
         });
       } catch (error) {
         console.error('Error fetching trend data:', error);
@@ -85,7 +87,7 @@ const Trends = () => {
             <div className="card-body">
               <h5 className="card-title">Monthly</h5>
               <p className="card-text trend-value" onClick={handleToggle}>
-                {footfallData.monthly.current} visitors {renderTrend(footfallData.monthly.current, footfallData.monthly.previous, showPercentage)}
+                {footfallData.monthly_footfall.current} visitors {renderTrend(footfallData.monthly_footfall.current, footfallData.monthly_footfall.previous, showPercentage)}
               </p>
             </div>
           </div>
@@ -95,7 +97,7 @@ const Trends = () => {
             <div className="card-body">
               <h5 className="card-title">Weekly</h5>
               <p className="card-text trend-value" onClick={handleToggle}>
-                {footfallData.weekly.current} visitors {renderTrend(footfallData.weekly.current, footfallData.weekly.previous, showPercentage)}
+                {footfallData.weekly_footfall.current} visitors {renderTrend(footfallData.weekly_footfall.current, footfallData.weekly_footfall.previous, showPercentage)}
               </p>
             </div>
           </div>
@@ -105,7 +107,7 @@ const Trends = () => {
             <div className="card-body">
               <h5 className="card-title">Daily</h5>
               <p className="card-text trend-value" onClick={handleToggle}>
-                {footfallData.daily.current} visitors {renderTrend(footfallData.daily.current, footfallData.daily.previous, showPercentage)}
+                {footfallData.daily_footfall.current} visitors {renderTrend(footfallData.daily_footfall.current, footfallData.daily_footfall.previous, showPercentage)}
               </p>
             </div>
           </div>
@@ -115,7 +117,7 @@ const Trends = () => {
             <div className="card-body">
               <h5 className="card-title">Hourly</h5>
               <p className="card-text trend-value" onClick={handleToggle}>
-                {footfallData.hourly.current} visitors {renderTrend(footfallData.hourly.current, footfallData.hourly.previous, showPercentage)}
+                {footfallData.hourly_footfall.current} visitors {renderTrend(footfallData.hourly_footfall.current, footfallData.hourly_footfall.previous, showPercentage)}
               </p>
             </div>
           </div>
@@ -131,7 +133,7 @@ const Trends = () => {
             <div className="card-body">
               <h5 className="card-title">Monthly</h5>
               <p className="card-text trend-value" onClick={handleToggle}>
-                <FaRupeeSign /> {salesData.monthly.current} {renderTrend(salesData.monthly.current, salesData.monthly.previous, showPercentage)}
+                <FaRupeeSign /> {salesData.monthly_sales.current} {renderTrend(salesData.monthly_sales.current, salesData.monthly_sales.previous, showPercentage)}
               </p>
             </div>
           </div>
@@ -141,7 +143,7 @@ const Trends = () => {
             <div className="card-body">
               <h5 className="card-title">Weekly</h5>
               <p className="card-text trend-value" onClick={handleToggle}>
-                <FaRupeeSign /> {salesData.weekly.current} {renderTrend(salesData.weekly.current, salesData.weekly.previous, showPercentage)}
+                <FaRupeeSign /> {salesData.weekly_sales.current} {renderTrend(salesData.weekly_sales.current, salesData.weekly_sales.previous, showPercentage)}
               </p>
             </div>
           </div>
@@ -151,7 +153,7 @@ const Trends = () => {
             <div className="card-body">
               <h5 className="card-title">Daily</h5>
               <p className="card-text trend-value" onClick={handleToggle}>
-                <FaRupeeSign /> {salesData.daily.current} {renderTrend(salesData.daily.current, salesData.daily.previous, showPercentage)}
+                <FaRupeeSign /> {salesData.daily_sales.current} {renderTrend(salesData.daily_sales.current, salesData.daily_sales.previous, showPercentage)}
               </p>
             </div>
           </div>
@@ -161,7 +163,7 @@ const Trends = () => {
             <div className="card-body">
               <h5 className="card-title">Hourly</h5>
               <p className="card-text trend-value" onClick={handleToggle}>
-                <FaRupeeSign /> {salesData.hourly.current} {renderTrend(salesData.hourly.current, salesData.hourly.previous, showPercentage)}
+                <FaRupeeSign /> {salesData.hourly_sales.current} {renderTrend(salesData.hourly_sales.current, salesData.hourly_sales.previous, showPercentage)}
               </p>
             </div>
           </div>
