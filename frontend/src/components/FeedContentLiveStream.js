@@ -131,8 +131,9 @@ const FeedContent = () => {
 
       await Promise.all(newFeedIds.map(createNewContainerForFeed));
 
-      setFeeds(response.data);
-      
+      //setFeeds(response.data);
+      setFeeds(response.data.sort((a, b) => a.id - b.id));
+
       // Create stream websockets for all feeds
       for (const feed of response.data) {
         createStreamSocket(feed.id);
@@ -163,7 +164,10 @@ const FeedContent = () => {
       })),
     };
 
-    setActiveFeedContainers(prevContainers => [...prevContainers, newContainer]);
+    //setActiveFeedContainers(prevContainers => [...prevContainers, newContainer]);
+    setActiveFeedContainers(prevContainers => 
+      [...prevContainers, newContainer].sort((a, b) => a.feedId - b.feedId)
+    );
   };
 
   const handleWebSocketNotification = (messageData) => {
@@ -176,14 +180,14 @@ const FeedContent = () => {
           container.feedId === feedId
             ? {
                 ...container,
-                sections: container.sections.map(section =>
+                sections: container.sections && container.sections.map(section =>
                   section.sectionId === sectionId
                     ? { ...section, entryCount: (section.entryCount || 0) + 1, highlighted: true, highlightType: 'entry' }
                     : section
                 ),
               }
             : container
-        )
+        ).sort((a, b) => a.feedId - b.feedId)
       );
       setTimeout(() => {
         setActiveFeedContainers((prevContainers) =>
@@ -191,7 +195,7 @@ const FeedContent = () => {
             container.feedId === feedId
               ? {
                   ...container,
-                  sections: container.sections.map((section) =>
+                  sections: container.sections && container.sections.map((section) =>
                     section.sectionId === sectionId
                       ? { ...section, highlighted: false }
                       : section
@@ -208,14 +212,14 @@ const FeedContent = () => {
           container.feedId === feedId
             ? {
                 ...container,
-                sections: container.sections.map(section =>
+                sections: container.sections && container.sections.map(section =>
                   section.sectionId === sectionId
                     ? { ...section, exitCount: (section.exitCount || 0) + 1, highlighted: true, highlightType: 'exit' }
                     : section
                 ),
               }
             : container
-        )
+        ).sort((a, b) => a.feedId - b.feedId)
       );
       setTimeout(() => {
         setActiveFeedContainers((prevContainers) =>
@@ -223,7 +227,7 @@ const FeedContent = () => {
             container.feedId === feedId
               ? {
                   ...container,
-                  sections: container.sections.map(section=>
+                  sections: container.sections && container.sections.map(section=>
                   section.sectionId === sectionId
                       ? { ...section, highlighted: false }
                       : section
@@ -245,7 +249,7 @@ const FeedContent = () => {
       } else {
         updatedContainers.push({ feedId, imageData });
       }
-      return updatedContainers;
+      return updatedContainers.sort((a, b) => a.feedId - b.feedId);
     });
   };
 
@@ -262,8 +266,20 @@ const FeedContent = () => {
   };
 
   const handleFeedDelete = async (feedId) => {
+    
+    console.log("Feed status ", feedId, ": ", feedStartStopStatus[feedId]);
+    if(feedStartStopStatus[feedId] === 'started'){
+      alert('Please stop the feed before deleting it!');
+      return;
+    }
+
     try {
       await axios.delete(`${apiBaseUrl}/feed/delete-feed/${feedId}`);
+
+      // Update activeFeedContainers.
+      setActiveFeedContainers(prevContainers =>
+        prevContainers.filter(container => container.feedId !== feedId)
+      );
       // Refresh the feed data after a feed is deleted
       fetchFeedData();
     } catch (error) {
@@ -288,9 +304,9 @@ const FeedContent = () => {
           [feedId]: 'stopped',
         }));
       }
-      setActiveFeedContainers(prevContainers =>
-        prevContainers.filter(container => container.feedId !== feedId)
-      );
+      // setActiveFeedContainers(prevContainers =>
+      //   prevContainers.filter(container => container.feedId !== feedId)
+      // );
     } else {
       const response = await axios.post(`${apiBaseUrl}/feed/start-feed/${feedId}`);
       if (response.data === 'success') {
@@ -403,7 +419,7 @@ const FeedContent = () => {
                   <track kind="subtitles" />
                 </video> */}
               </div>
-              {container.sections.map((section) => (
+              {container.sections && container.sections.map((section) => (
                 <React.Fragment key={section.sectionId}>
                   <div className="col">
                     <h5 className="card-title">Section : {section.sectionId}</h5>
