@@ -135,9 +135,9 @@ const FeedContent = () => {
       setFeeds(response.data.sort((a, b) => a.id - b.id));
 
       // Create stream websockets for all feeds
-      for (const feed of response.data) {
-        createStreamSocket(feed.id);
-      }
+      // for (const feed of response.data) {
+      //   createStreamSocket(feed.id);
+      // }
 
       return response.data;
     } catch (error) {
@@ -303,11 +303,31 @@ const FeedContent = () => {
           ...prevStatus,
           [feedId]: 'stopped',
         }));
+        
+        // Close the stream socket for the given feedId
+        const streamSocket = activeStreamSockets.find(socket => {
+          const socketUrl = new URL(socket.url);
+          return socketUrl.pathname.endsWith(`/${feedId}`);
+        });
+        if (streamSocket) {
+          streamSocket.close();
+          setActiveStreamSockets(prevSockets => prevSockets.filter(socket => socket !== streamSocket));
+        }
+
+        // Reset the imageData for the container
+        setActiveFeedContainers(prevContainers =>
+          prevContainers.map(container =>
+            container.feedId === feedId ? { ...container, imageData: null } : container
+          )
+        );
       }
+      console.log("Stopped Active stream sockets: ", activeStreamSockets);
       // setActiveFeedContainers(prevContainers =>
       //   prevContainers.filter(container => container.feedId !== feedId)
       // );
     } else {
+      createStreamSocket(feedId);
+      console.log("Started Active stream sockets: ", activeStreamSockets);
       const response = await axios.post(`${apiBaseUrl}/feed/start-feed/${feedId}`);
       if (response.data === 'success') {
         setFeedStartStopStatus(prevStatus => ({

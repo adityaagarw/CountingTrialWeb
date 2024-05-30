@@ -78,7 +78,32 @@ const RegionSelectorPage = () => {
                 bottomLeft: { x: dragStartPoint.x, y },
               };
             } else {
-              return { ...region, [draggedPoint]: { x, y } };
+              const updatedRegion = { ...region };
+              updatedRegion[draggedPoint] = { x, y };
+  
+              // Update the other points based on the dragged point
+              switch (draggedPoint) {
+                case 'topLeft':
+                  updatedRegion.topRight.y = y;
+                  updatedRegion.bottomLeft.x = x;
+                  break;
+                case 'topRight':
+                  updatedRegion.topLeft.y = y;
+                  updatedRegion.bottomRight.x = x;
+                  break;
+                case 'bottomRight':
+                  updatedRegion.topRight.y = y;
+                  updatedRegion.bottomLeft.x = x;
+                  break;
+                case 'bottomLeft':
+                  updatedRegion.topLeft.y = y;
+                  updatedRegion.bottomRight.x = x;
+                  break;
+                default:
+                  break;
+              }
+  
+              return updatedRegion;
             }
           }
           return region;
