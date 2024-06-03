@@ -3,8 +3,9 @@ import './Trends.css';
 import axios from 'axios';
 
 import React, { useState, useEffect } from 'react';
+import { backendUrl } from '../config';
 
-const apiBaseUrl = 'http://127.0.0.1:8000';
+const apiBaseUrl = backendUrl;
 
 const Trends = () => {
   const [footfallData, setFootfallData] = useState({

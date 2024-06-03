@@ -4,8 +4,9 @@ import AddFeedForm from './AddFeedForm';
 import RegionSelectorPage from './RegionSelectorPage';
 import { json, useNavigate } from 'react-router-dom';
 import './styles.css';
+import { backendUrl, notificationWebSocketUrl, streamWebSocketUrl, webSocketBaseUrl } from '../config';
 
-const apiBaseUrl = 'http://127.0.0.1:8000';
+const apiBaseUrl = backendUrl;
 
 const FeedContent = () => {
   const [selectedFeed, setSelectedFeed] = useState(null);
@@ -50,7 +51,7 @@ const FeedContent = () => {
   }, []);
 
   useEffect(() => {
-    const notificationSocket = new WebSocket(`ws://127.0.0.1:8000/ws`);
+    const notificationSocket = new WebSocket(notificationWebSocketUrl);
     notificationWebSocketRef.current = notificationSocket;
 
     notificationSocket.onopen = () => {
@@ -84,7 +85,7 @@ const FeedContent = () => {
   }, []);
 
   const createStreamSocket = (feed_id) => {
-    const streamSocket = new WebSocket(`ws://127.0.0.1:8000/stream/${feed_id}`);
+    const streamSocket = new WebSocket(streamWebSocketUrl + `${feed_id}`);
 
     setActiveStreamSockets(prevStreamSockets => [...prevStreamSockets, streamSocket]);
 

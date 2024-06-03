@@ -5,8 +5,9 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../App';
 import { useNavigate } from 'react-router-dom';
+import { backendUrl } from '../config';
 
-const apiBaseUrl = 'http://127.0.0.1:8000';
+const apiBaseUrl = backendUrl;
 
 const Login = () => {
   const { setAuthStatus } = useContext(AuthContext);

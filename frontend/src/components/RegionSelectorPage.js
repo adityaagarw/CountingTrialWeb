@@ -2,8 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { backendUrl } from '../config';
 
-const apiBaseUrl = 'http://127.0.0.1:8000';
+const apiBaseUrl = backendUrl;
 
 const RegionSelectorPage = () => {
   const { feedId } = useParams();

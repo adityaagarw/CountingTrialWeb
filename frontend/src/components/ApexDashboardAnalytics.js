@@ -3,6 +3,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import Chart from 'react-apexcharts';
 import AnalyticsPopupForm from './AnalyticsPopupForm';
+import { backendUrl } from '../config';
 
 const ApexDashboardAnalytics = () => {
   const [fromDate, setFromDate] = useState(new Date());
@@ -52,7 +53,7 @@ const ApexDashboardAnalytics = () => {
        }; 
       console.log('requestBody: ', requestBody);
     
-      const response = await fetch('http://127.0.0.1:8000' + apiEndpoint, {
+      const response = await fetch(backendUrl + apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

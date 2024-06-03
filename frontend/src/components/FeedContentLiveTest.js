@@ -4,8 +4,9 @@ import AddFeedForm from './AddFeedForm';
 import RegionSelectorPage from './RegionSelectorPage';
 import { useNavigate } from 'react-router-dom';
 import './styles.css';
+import { backendUrl, notificationWebSocketUrl, streamWebSocketUrl, webSocketBaseUrl } from '../config';
 
-const apiBaseUrl = 'http://127.0.0.1:8000';
+const apiBaseUrl = backendUrl;
 
 const FeedContent = () => {
   const [selectedFeed, setSelectedFeed] = useState(null);
@@ -44,7 +45,7 @@ const FeedContent = () => {
 
   // Establish WebSocket connection only once when the component mounts
   useEffect(() => {
-    const webSocket = new WebSocket(`ws://127.0.0.1:8000/ws`);
+    const webSocket = new WebSocket(notificationWebSocketUrl);
     webSocketRef.current = webSocket;
 
     webSocket.onopen = () => {
@@ -89,7 +90,7 @@ const FeedContent = () => {
 
   // Effect to establish the /stream WebSocket connection
   useEffect(() => {
-    const socket = new WebSocket('ws://127.0.0.1:8000/stream');
+    const socket = new WebSocket(streamWebSocketUrl);
     setStreamSocket(socket);
     streamSocketRef.current = streamSocket;
 

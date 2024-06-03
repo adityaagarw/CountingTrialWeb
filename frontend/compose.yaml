@@ -9,6 +9,6 @@ services:
     volumes:
       - .:/app
     ports:
-      - "3000:3000"
+      - "9988:3000"
     environment:
       - NODE_ENV=development

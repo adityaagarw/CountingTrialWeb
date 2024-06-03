@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
+import { backendUrl } from '../config';
 
 const AnalyticsPopupForm = ({ onFormSubmit }) => {
   const [feedId, setFeedId] = useState('');
@@ -17,7 +18,7 @@ const AnalyticsPopupForm = ({ onFormSubmit }) => {
     const fetchSections = async () => {
       if (feedId) {
         try {
-          const response = await axios.get(`http://localhost:8000/feed/get-sections/${feedId}`);
+          const response = await axios.get(backendUrl + `/feed/get-sections/${feedId}`);
           setSections(response.data);
         } catch (error) {
           console.error('Error fetching sections:', error);

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AddCameraForm from './AddCameraForm';
+import { backendUrl } from '../config';
 
-const apiBaseUrl = 'http://127.0.0.1:8000';
+const apiBaseUrl = backendUrl;
 
 const CameraContent = () => {
   const [showAddCameraForm, setShowAddCameraForm] = useState(false);

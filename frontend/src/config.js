@@ -1,0 +1,10 @@
+export const baseUrl = 'http://127.0.0.1';
+export const backendPort = '8181';
+export const frontendPort = '9988';
+export const backendPort_internal = '8000';
+export const frontendPort_internal = '3000';
+export const backendUrl = `${baseUrl}:${backendPort}`;
+export const frontendUrl = `${baseUrl}:${frontendPort}`;
+export const webSocketBaseUrl = 'ws://127.0.0.1';
+export const notificationWebSocketUrl = `${webSocketBaseUrl}:${backendPort}` + '/ws';
+export const streamWebSocketUrl = `${webSocketBaseUrl}:${backendPort}` + '/stream/';
